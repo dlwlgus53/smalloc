@@ -62,12 +62,14 @@ void print_unused()
 void merge_unused()
 {
 	sm_container_ptr itr = 0x0;
-	for(itr = sm_unused_containers ; itr!=0x0; itr = itr->next_unused){
+	for(itr = sm_unused_containers ; itr->next_unused!=0x0; itr = itr->next_unused){
 		if(itr->next_unused == itr->next){
 			//have to merge
-			//itr->next = itr->next->next;
-			//itr->next_unused = itr->next_unused->next_unused;
-			//itr->dsize += itr->next->dsize + sizeof(sm_container_t) ;
+			sm_container_ptr next = itr->next->next;
+			sm_container_ptr unused = itr->next->next_unused;
+			itr->next = next;
+			itr->next_unused = unused;
+			itr->dsize += itr->next->dsize + sizeof(sm_container_t) ;
 		}
 	}
 }
@@ -170,7 +172,7 @@ void sfree(void * p)
 		}
 	}
 	
-	//merge_unused();
+	merge_unused();
 }
 
 void print_sm_containers()
