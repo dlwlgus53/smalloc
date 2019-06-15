@@ -16,8 +16,63 @@ void sm_container_split(sm_container_ptr hole, size_t size)
 	remainder->next = hole->next ;
 	hole->next = remainder ;
 
-	if (hole == sm_last)
-		sm_last = remainder ;
+	sm_container_ptr itr = 0x0;
+	if (sm_unused_containers == 0x0){
+		sm_unused_containers = remainder;
+	}
+	else{
+		if(hole == sm_last){
+			//last part
+			sm_container_ptr itr = 0x0 ;
+    			//find last fo unused container
+			for (itr = sm_unused_containers ; itr->next_unused != 0x0 && itr->next_unused != hole ; itr = itr->next_unused);
+				
+				itr->next_unused = remainder;
+		
+		}else if(hole == sm_first){
+			remainder->next_unused = hole->next_unused;
+			sm_unused_containers = remainder;
+		}
+		
+		else{
+			//mid part
+			sm_container_ptr itr = 0x0 ;
+			for(itr = sm_unused_containers ; itr->next_unused !=hole ; itr = itr->next_unused);		
+				remainder->next_unused = hole->next_unused;
+				itr->next_unused = remainder;
+		}
+			
+	}
+
+  	if (hole == sm_last)
+                sm_last = remainder ;
+
+		
+}
+
+void print_unused()
+{
+	sm_container_ptr itr = 0x0;
+	printf("unused linked list\n");
+	for(itr = sm_unused_containers ; itr!=0x0; itr = itr->next_unused){
+		printf("%8d ->", (int)itr->dsize);
+	}
+	printf("\n");
+}
+
+void merge_unused()
+{
+	sm_container_ptr itr = 0x0;
+	for(itr = sm_unused_containers ; itr->next_unused!=0x0; itr = itr->next_unused){
+		if(itr->next_unused == itr->next){
+			//have to merge
+			sm_container_ptr next = itr->next->next;
+			sm_container_ptr unused = itr->next->next_unused;
+			itr->next = next;
+			itr->next_unused = unused;
+			itr->dsize += itr->next->dsize + sizeof(sm_container_t) ;
+		}
+	}
 }
 
 void * sm_retain_more_memory(int size)
@@ -110,9 +165,15 @@ void sfree(void * p)
 	for (itr = sm_first ; itr->next != 0x0 ; itr = itr->next) {
 		if (itr->data == p) {
 			itr->status = Unused ;
+			if(itr == sm_first){
+				itr->next_unused = sm_unused_containers;
+				sm_unused_containers = itr;
+			} 
 			break ;
 		}
 	}
+	
+	merge_unused();
 }
 
 void print_sm_containers()

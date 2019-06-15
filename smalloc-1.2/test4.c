@@ -11,17 +11,14 @@ main()
 	p1 = smalloc(5000) ; 
 	printf("smalloc(5000)\n") ; 
 	print_sm_containers() ;
-	print_unused();
 	
 	p2 = smalloc(3500) ; 
 	printf("smalloc(3500)\n") ; 
 	print_sm_containers() ;
-	print_unused();
 
 	p3 = smalloc(10) ; 
 	printf("smalloc(10)\n") ; 
 	print_sm_containers() ;
 
     	print_sm_uses() ; 
-	print_unused() ;
 }
