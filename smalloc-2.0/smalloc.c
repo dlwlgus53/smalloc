@@ -16,12 +16,12 @@ void sm_container_split(sm_container_ptr hole, size_t size)
 	remainder->next = hole->next ;
 	hole->next = remainder ;
 
+	sm_container_ptr itr = 0x0;
 	if (sm_unused_containers == 0x0){
 		sm_unused_containers = remainder;
 	}
 	else{
 		if(hole == sm_last){
-			printf("yes last!");
 			//last part
 			sm_container_ptr itr = 0x0 ;
     			//find last fo unused container
@@ -29,11 +29,16 @@ void sm_container_split(sm_container_ptr hole, size_t size)
 				
 				itr->next_unused = remainder;
 		
+		}else if(hole == sm_first){
+			remainder->next_unused = hole->next_unused;
+			sm_unused_containers = remainder;
 		}
+		
 		else{
 			//mid part
 			sm_container_ptr itr = 0x0 ;
 			for(itr = sm_unused_containers ; itr->next_unused !=hole ; itr = itr->next_unused);		
+				printf("?");
 				remainder->next_unused = hole->next_unused;
 				itr->next_unused = remainder;
 		}
@@ -51,6 +56,19 @@ void print_unused()
 	sm_container_ptr itr = 0x0;
 	for(itr = sm_unused_containers ; itr!=0x0; itr = itr->next_unused){
 		printf("unused : %8d\n", (int)itr->dsize);
+	}
+}
+
+void merge_unused()
+{
+	sm_container_ptr itr = 0x0;
+	for(itr = sm_unused_containers ; itr!=0x0; itr = itr->next_unused){
+		if(itr->next_unused == itr->next){
+			//have to merge
+			//itr->next = itr->next->next;
+			//itr->next_unused = itr->next_unused->next_unused;
+			//itr->dsize += itr->next->dsize + sizeof(sm_container_t) ;
+		}
 	}
 }
 
@@ -144,9 +162,15 @@ void sfree(void * p)
 	for (itr = sm_first ; itr->next != 0x0 ; itr = itr->next) {
 		if (itr->data == p) {
 			itr->status = Unused ;
+			if(itr == sm_first){
+				itr->next_unused = sm_unused_containers;
+				sm_unused_containers = itr;
+			} 
 			break ;
 		}
 	}
+	
+	//merge_unused();
 }
 
 void print_sm_containers()
