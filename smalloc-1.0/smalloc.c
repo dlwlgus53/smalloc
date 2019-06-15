@@ -41,7 +41,7 @@ void * sm_retain_more_memory(int size)
 void * smalloc(size_t size) 
 {
 	sm_container_ptr hole = 0x0 ;
-
+	size_t bestFit =-1;
 	sm_container_ptr itr = 0x0 ;
 	for (itr = sm_first ; itr != 0x0 ; itr = itr->next) {
 		if (itr->status == Busy)
@@ -54,8 +54,14 @@ void * smalloc(size_t size)
 		}
 		else if (size + sizeof(sm_container_t) < itr->dsize) {
 			// a hole large enought to split 
-			hole = itr ;
-			break ; 
+			if(bestFit == -1){//init
+				hole = itr ;
+				bestFit = itr->dsize;
+			}else if(bestFit>itr->dsize){
+				hole = itr ;
+				bestFit = itr->dsize;
+			}
+			 
 		}
 	}
 	if (hole == 0x0) {
@@ -92,8 +98,8 @@ void print_sm_uses()
         if(itr->status == Busy) uses+=itr->dsize;
     }
     printf("Total retained size for smalloc : %8d\n", sum);
-    printf("Total allocated size  : %8d\n", uses);
-    printf("Retaind but not allocated size : %8d\n", sum-uses);
+    printf("Total allocated size            : %8d\n", uses);
+    printf("Retaind but not allocated size  : %8d\n", sum-uses);
     
     
 }
