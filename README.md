@@ -1,4 +1,4 @@
-# smalloc
+# Smalloc
 ###### Symple Dynamic Memory Allocation Library
 
 ## Report
